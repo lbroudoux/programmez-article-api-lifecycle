@@ -12,6 +12,55 @@ info:
     name: MIT License
     url: https://opensource.org/licenses/MIT
 paths:
+  /fruits:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fruit'
+              examples:
+                fruits:
+                  value:
+                  - id: 31e1c6c8-4d75-4753-918f-d026749e3743
+                    name: Apple
+                    origin: France
+                  - id: cbc41087-40ff-44b6-a3bb-b88a47b49ffd
+                    name: Grape
+                    origin: Italy
+          description: Retrieve all Fruits
+      operationId: GetFruits
+      summary: Get all Fruits
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FruitRequest'
+            examples:
+              Orange:
+                value:
+                  name: Orange
+                  origin: Spain
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fruit'
+              examples:
+                Orange:
+                  value:
+                    id: "{{guid()}}"
+                    name: Orange
+                    origin: Spain
+          description: Created Fruit
+      operationId: CreateFruit
+      summary: Create a Fruit
   /fruits/{id}:
     get:
       responses:
@@ -77,7 +126,7 @@ paths:
           value: 31e1c6c8-4d75-4753-918f-d026749e3743
         Grape:
           value: cbc41087-40ff-44b6-a3bb-b88a47b49ffd
-        Strawberry:
+        Updated:
           value: 13fd84fc-745a-4676-ad9b-185082000652
       name: id
       description: Fruit identifier
@@ -85,55 +134,6 @@ paths:
         type: string
       in: path
       required: true
-  /fruits:
-    get:
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Fruit'
-              examples:
-                fruits:
-                  value:
-                  - id: 31e1c6c8-4d75-4753-918f-d026749e3743
-                    name: Apple
-                    origin: France
-                  - id: cbc41087-40ff-44b6-a3bb-b88a47b49ffd
-                    name: Grape
-                    origin: Italy
-          description: Retrieve all Fruits
-      operationId: GetFruits
-      summary: Get all Fruits
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FruitRequest'
-            examples:
-              Orange:
-                value:
-                  name: Orange
-                  origin: Spain
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Fruit'
-              examples:
-                Orange:
-                  value:
-                    id: "{{guid()}}"
-                    name: Orange
-                    origin: Spain
-          description: Created Fruit
-      operationId: CreateFruit
-      summary: Create a Fruit
 components:
   schemas:
     FruitRequest:
