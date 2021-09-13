@@ -1,0 +1,113 @@
+---
+openapi: 3.0.2
+info:
+  title: Fruits Catalog API
+  version: 1.0.0
+  description: Article Programmez! Full API LIfecycle
+  contact:
+    name: Laurent Broudoux
+    url: https://github.com/lbroudoux
+    email: lbroudou@redhat.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+paths:
+  /fruits/{id}:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fruit'
+          description: Requested Fruit
+      operationId: GetFruitById
+      summary: Get Fruit by Id
+    put:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fruit'
+          description: Updated Fruit
+      operationId: UpdateFruitById
+      summary: Update Fruit by Id
+    delete:
+      responses:
+        "204":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Fruit has been deleted
+      operationId: DeleteFruitById
+      summary: Delete Fruit by Id
+    parameters:
+    - name: id
+      description: Fruit identifier
+      schema:
+        type: string
+      in: path
+      required: true
+  /fruits:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fruit'
+          description: Retrieve all Fruits
+      operationId: GetFruits
+      summary: Get all Fruits
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FruitRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fruit'
+          description: Created Fruit
+      operationId: CreateFruit
+      summary: Create a Fruit
+components:
+  schemas:
+    FruitRequest:
+      description: Request for creating a new Fruit
+      required:
+      - name
+      - origin
+      type: object
+      properties:
+        name:
+          description: Name of the fruit
+          type: string
+        origin:
+          description: Origin of the fruit
+          enum:
+          - France
+          - Italy
+          - Spain
+          - Morocco
+          type: string
+    Fruit:
+      description: The complete Fruit entity
+      type: object
+      allOf:
+      - required:
+        - id
+        type: object
+        properties:
+          id:
+            description: Unique identifier of Fruit
+            type: string
+      - $ref: '#/components/schemas/FruitRequest'
