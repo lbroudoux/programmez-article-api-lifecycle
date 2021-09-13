@@ -35,12 +35,29 @@ paths:
       operationId: GetFruitById
       summary: Get Fruit by Id
     put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FruitRequest'
+            examples:
+              Updated:
+                value:
+                  name: Strawberry
+                  origin: Morocco
+        required: true
       responses:
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Fruit'
+              examples:
+                Updated:
+                  value:
+                    id: "{{request.path[1]}}"
+                    name: "{{request.body/name}}"
+                    origin: "{{request.body/origin}}"
           description: Updated Fruit
       operationId: UpdateFruitById
       summary: Update Fruit by Id
@@ -60,6 +77,8 @@ paths:
           value: 31e1c6c8-4d75-4753-918f-d026749e3743
         Grape:
           value: cbc41087-40ff-44b6-a3bb-b88a47b49ffd
+        Strawberry:
+          value: 13fd84fc-745a-4676-ad9b-185082000652
       name: id
       description: Fruit identifier
       schema:
