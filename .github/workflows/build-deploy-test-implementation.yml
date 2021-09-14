@@ -10,9 +10,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install OpenShift client
-        uses: redhat-actions/oc-installer@v1
+        uses: redhat-actions/openshift-tools-installer@v1
         with:
-          oc_version: '4.7'
+          oc: '4.7.28'
 
       - name: Authenticate to OpenShift and set context
         uses: redhat-actions/oc-login@v1
