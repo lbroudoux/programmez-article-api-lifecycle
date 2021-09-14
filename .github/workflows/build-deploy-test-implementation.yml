@@ -1,0 +1,81 @@
+name: build-deploy-test-implementation.yml
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      # Checkout repository content
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install OpenShift client
+        uses: redhat-actions/oc-installer@v1
+        with:
+          oc_version: '4.7'
+
+      - name: Authenticate to OpenShift and set context
+        uses: redhat-actions/oc-login@v1
+        with:
+          # URL to your OpenShift cluster.
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+
+          # Credentials, if desired instead of token.
+          openshift_username: ${{ secrets.OPENSHIFT_USER }}
+          openshift_password: ${{ secrets.OPENSHIFT_PASSWORD }}
+
+          # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+          insecure_skip_tls_verify: true
+          # Optional - this sets your Kubernetes context's current namespace after logging in.
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
+
+      - name: Create/update resources on OpenShift cluster
+        run: |
+          set -x
+          cd ${{github.workspace}}
+          oc apply -f manifests/fruits-catalog-resources.yml -n ${{ secrets.OPENSHIFT_NAMESPACE }}
+
+      - name: Filter artifacts
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            sources:
+              - 'src/**'
+
+      - name: Start build on OpenShift cluster
+        if: steps.changes.outputs.sources == 'true'
+        run: |
+          set -x
+          oc start-build fruits-catalog --follow=true -n ${{ secrets.OPENSHIFT_NAMESPACE }}
+
+      - name: Check during max 3 minutes to allow deployment to be ready
+        if: steps.changes.outputs.sources == 'true'
+        timeout-minutes: 3
+        run: |
+          while [[ ! "$(oc rollout status deployment fruits-catalog -n ${{ secrets.OPENSHIFT_NAMESPACE }})" =~ "successfully" ]]; do
+            sleep 15
+          done
+          while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${{ secrets.FRUITS_CATALOG_URL }}/q/health )" != "200" ]]; do
+            sleep 5
+          done
+
+      - name: Microcks Test GitHub action
+        if: steps.changes.outputs.sources == 'true'
+        # You may pin to the exact commit or the version.
+        uses: microcks/test-github-action@main
+        with:
+          # <apiName:apiVersion>: Service to test reference. Example: 'Beer Catalog API:0.9'
+          apiNameAndVersion: 'Fruits Catalog API:1.0.0'
+          # URL where is deployed implementation to test
+          testEndpoint: ${{ secrets.FRUITS_CATALOG_URL }}/api
+          # Test strategy (one of: HTTP, SOAP, SOAP_UI, POSTMAN, OPEN_API_SCHEMA, ASYNC_API_SCHEMA)
+          runner: OPEN_API_SCHEMA
+          # Microcks instance API endpoint
+          microcksURL: ${{ secrets.MICROCKS_URL }}
+          # Keycloak Realm Service Account ClientId
+          keycloakClientId: ${{ secrets.MICROCKS_SERVICE_ACCOUNT }}
+          # Keycloak Realm Service Account ClientSecret
+          keycloakClientSecret: ${{ secrets.MICROCKS_SERVICE_ACCOUNT_CREDENTIALS }}
+          # Time to wait for test to finish (int + one of: milli, sec, min)
+          waitFor: 10sec
