@@ -117,6 +117,9 @@ paths:
             application/json:
               schema:
                 type: string
+              examples:
+                Deleted:
+                  value: ''''''
           description: Fruit has been deleted
       operationId: DeleteFruitById
       summary: Delete Fruit by Id
@@ -128,6 +131,8 @@ paths:
           value: cbc41087-40ff-44b6-a3bb-b88a47b49ffd
         Updated:
           value: 13fd84fc-745a-4676-ad9b-185082000652
+        Deleted:
+          value: 27f6ff5d-9a44-4bb2-8429-6d539a791fd1
       name: id
       description: Fruit identifier
       schema:
