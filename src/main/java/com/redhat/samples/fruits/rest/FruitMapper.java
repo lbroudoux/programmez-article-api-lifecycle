@@ -10,6 +10,7 @@ import java.util.List;
 
 @Mapper(componentModel = "cdi")
 /**
+ * This is a MapStruct mapper definition for Fruit related domain.
  * @author laurent
  */
 public interface FruitMapper {
